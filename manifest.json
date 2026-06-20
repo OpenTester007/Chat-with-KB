@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI-based Translator",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "中英日韩四国语言互译与AI智能助手",
   "permissions": ["storage", "unlimitedStorage"],
   "host_permissions": [
