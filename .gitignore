@@ -1,0 +1,13 @@
+# Windows image caches
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Agent / Tooling files
+.workbuddy/
+.agents/
+.gemini/
+scratch/
+task.md
+implementation_plan.md
+walkthrough.md
