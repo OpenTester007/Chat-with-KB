@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 - CHANGELOG.md (this file)
 
 ### Changed
-- README rewritten in English with comprehensive documentation
+- README rewritten in English
 
 ## [3.5.0] - 2026-06-20
 

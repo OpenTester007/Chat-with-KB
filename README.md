@@ -4,19 +4,19 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-> AI-powered translation and assistant browser extension — Chinese, English, Japanese, Korean. Free. Works out of the box.
+> Translation and assistant browser extension — Chinese, English, Japanese, Korean. Free. Works out of the box.
 
 ![Extension Screenshot](screenshots/translate-store.png)
 
-## ✨ Features
+## Features
 
-- **AI Translation** — Translate between Chinese, English, Japanese, and Korean. Auto-detects source language with natural, accurate results.
-- **Text Polishing** — Intelligent language detection. Polishes writing while preserving meaning, with detailed revision notes in Chinese.
-- **AI Dictionary** — Core definitions, parts of speech, root/affix analysis, and bilingual example sentences.
-- **AI Chat** — Sidebar-style AI chat assistant with conversation memory.
-- **History** — Auto-saves the last 10 translation and query records.
+- **Translation** — Translate between Chinese, English, Japanese, and Korean. Auto-detects source language.
+- **Text Polishing** — Polishes text and explains changes in Chinese.
+- **Dictionary** — Definitions, parts of speech, root/affix analysis, and bilingual example sentences.
+- **Chat** — Sidebar chat assistant with conversation memory.
+- **History** — Saves the last 10 records.
 
-## 🚀 Installation
+## Installation
 
 ### From Microsoft Edge Add-ons Store
 
@@ -26,7 +26,6 @@
 
 1. Click the badge above to open the Edge Add-ons store page.
 2. Click **Get** to install.
-3. The extension is ready to use immediately with the built-in free API channel.
 
 ### Sideload (Developer Mode)
 
@@ -39,7 +38,7 @@
 4. Click **Load unpacked** and select the cloned folder.
 5. The extension should now appear in your toolbar.
 
-## ⚙️ Configuration
+## Configuration
 
 | Setting | Default | Description |
 |---------|---------|-------------|
@@ -73,14 +72,13 @@ Then in the extension settings, set:
 - **API Endpoint**: `http://localhost:11434/v1`
 - **Model**: your Ollama model name (e.g., `llama3`, `qwen2.5`, `mistral`)
 
-## 🛠 Tech Stack
+## Tech Stack
 
-- **Manifest V3** — Chrome Extension Manifest V3 specification
-- **Vanilla JavaScript** — No frameworks, lightweight and fast
-- **NVIDIA Build API** — Default AI backend (OpenAI-compatible)
-- **CSS Custom Properties** — Themed UI with dark mode support
+- **Manifest V3**
+- **Vanilla JavaScript** — No frameworks
+- **NVIDIA Build API** (OpenAI-compatible)
 
-## 🔧 Development
+## Development
 
 ```bash
 git clone https://github.com/OpenTester007/Chat-with-KB.git
@@ -90,7 +88,7 @@ cd Chat-with-KB
 
 Edit `popup.js`, `popup.html`, or `style.css`, then reload the extension from `edge://extensions/`.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── manifest.json          # Extension manifest (MV3)
@@ -107,19 +105,15 @@ Edit `popup.js`, `popup.html`, or `style.css`, then reload the extension from `e
 └── CHANGELOG.md           # Release history
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## 📜 License
+## License
 
 MIT © [AI-based Translator Contributors](LICENSE)
 
-## 🙏 Acknowledgements
+## Credits
 
-- Powered by [NVIDIA Build](https://build.nvidia.com) free AI platform
-- Built on the [OpenAI-compatible API](https://platform.openai.com/docs/api-reference) standard
-
----
-
-Made with ❤️ by [OpenTester007](https://github.com/OpenTester007)
+- Default API: [NVIDIA Build](https://build.nvidia.com)
+- Uses [OpenAI-compatible API](https://platform.openai.com/docs/api-reference)
