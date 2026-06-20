@@ -1,10 +1,8 @@
 # AI-based Translator (中英日韩四国语言互译与AI智能助手)
 
-基于 AI 的中英日韩四国语言互译与智能助手，提供快速翻译、文本润色、双语词典与 AI 聊天等功能。
+[![Microsoft Edge Add-ons](https://img.shields.io/badge/Microsoft_Edge-Add--ons-0078D4?style=for-the-badge&logo=microsoft-edge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/aibased-translator/mbjmkkdimfkjbjjfkjafdibnphdaoaej)
 
-> [!NOTE]
-> **Microsoft Edge 商店已发布**
-> 目前该版本已正式发布至 [Microsoft Edge 扩展商店](https://microsoftedge.microsoft.com/addons/)。
+基于 AI 的中英日韩四国语言互译与智能助手，提供快速翻译、文本润色、双语词典与 AI 聊天等功能。
 
 ## 🌟 主要功能
 
