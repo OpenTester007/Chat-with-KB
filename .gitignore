@@ -11,3 +11,7 @@ scratch/
 task.md
 implementation_plan.md
 walkthrough.md
+AGENTS.md
+
+# Build archives
+*.zip

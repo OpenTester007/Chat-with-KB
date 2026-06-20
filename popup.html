@@ -70,7 +70,13 @@
         </div>
         <div class="input-group">
           <label for="model" class="input-label">模型名称：</label>
-          <input type="text" id="model" class="config-input" placeholder="例如: deepseek-ai/deepseek-r1">
+          <input type="text" id="model" class="config-input" list="modelPresets" placeholder="从下拉选择或输入自定义模型名">
+          <datalist id="modelPresets">
+            <option value="openai/gpt-oss-20b">
+            <option value="deepseek-ai/deepseek-v4-flash">
+            <option value="meta/llama-3.3-70b-instruct">
+            <option value="google/gemma-4-31b-it">
+          </datalist>
         </div>
         <div class="input-group checkbox-group">
           <span class="input-label">流式传输：</span>

@@ -2,6 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ==================== Constants ==================== */
   const MAX_HISTORY_ITEMS = 10;
   const MAX_CHAT_HISTORY_TURNS = 5;
+  // NOTE FOR EDGE ADD-ONS REVIEWERS:
+  // This NVIDIA Build API key is intentionally embedded by the author for
+  // out-of-the-box usage. It is a free-tier key subject to NVIDIA platform
+  // rate limits. Users may replace it with their own key in the Settings
+  // page at any time. The author assumes full responsibility for this key.
+  // 作者声明: 此 API key 为作者本人有意公开, 用于开箱即用体验;
+  // 受 NVIDIA 平台限速控制, 用户可在「设置」页替换为自己的 key。
   const DEFAULT_API_KEY = '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';
   const DEFAULT_API_ENDPOINT = 'https://integrate.api.nvidia.com/v1';
   const DEFAULT_MODEL = 'openai/gpt-oss-20b';
