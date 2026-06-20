@@ -1,30 +1,18 @@
-# Roadmap
+# Project Roadmap
 
-> This is a living document. Features may be reprioritized based on user feedback.
+This document outlines the planned future features and updates for the AI-based Translator extension.
 
-## v3.5.x (Current)
+## 🚀 Near-Term Goals (v3.6.0)
+- [ ] **Context-Aware Translation**: Allow the AI to read surrounding context or paragraph-level information for higher translation accuracy.
+- [ ] **Shortcut Keys**: Support keyboard shortcuts to quickly trigger translation, polish, or chat popup.
+- [ ] **History Search**: Add a search and filter bar inside the History tab to quickly find past translations.
 
-- [x] Model preset dropdown (datalist)
-- [x] Fix `<think>` reasoning content leaking into translation output
-- [x] Unified API parameters (temperature: 0.7, top_p: 1, max_tokens: 4096)
-- [x] Privacy policy page for Edge Add-ons Store
-- [ ] Add screenshots to README
-- [ ] Test `temperature: 0.7` with `gpt-oss-20b` on NVIDIA platform (fallback plan ready)
+## 🌀 Medium-Term Goals (v3.7.0)
+- [ ] **Export Options**: Allow users to export their translation history to CSV or markdown formats.
+- [ ] **Voice Input / Output**: Add text-to-speech (TTS) playback and voice recognition capabilities.
+- [ ] **Custom Prompts**: Provide a settings panel for custom system prompts to customize translation and dictionary formats.
 
-## v3.6.x (Next)
-
-- [ ] Support per-model parameter presets (auto-detect reasoning vs non-reasoning models)
-- [ ] Add "View reasoning" toggle button for translation/polish/dictionary output
-- [ ] Export/import settings (API key, endpoint, model) as JSON
-- [ ] Dark mode support
-
-## v3.7.x (Future)
-
-- [ ] Support more language pairs (FR, DE, ES, etc.)
-- [ ] Context-aware translation (use selected text + page context)
-- [ ] Offline mode with local WebLLM (browser-based)
-- [ ] Usage analytics (opt-in, local only)
-
-## Ideas Welcome!
-
-Have an idea? [Open an Issue](https://github.com/OpenTester007/Chat-with-KB/issues) and let us know!
+## 🌌 Long-Term Goals (v4.0.0)
+- [ ] **Cloud Sync**: Optional cloud storage syncing for history and configuration settings across devices.
+- [ ] **Multi-Model Arena**: Side-by-side comparison of translations from multiple LLM models (e.g., DeepSeek vs GPT vs Llama).
+- [ ] **Webpage Inline Translation**: Allow translating selected text directly on any webpage without opening the popup.
