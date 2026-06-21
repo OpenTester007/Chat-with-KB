@@ -342,132 +342,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ==================== API Call ==================== */
   async function callAPI(text, operationType, chatHistoryContext = [], signal = null) {
-    const config = await chrome.storage.local.get([
-      'apiKey', 'apiEndpoint', 'model', 'streamTranslate', 'streamChat'
-    ]);
-    const {
-      apiKey,
-      apiEndpoint = DEFAULT_API_ENDPOINT,
-      model = DEFAULT_MODEL,
-      streamTranslate = true,
-      streamChat = true
-    } = config;
-
-    const isLocalhost = apiEndpoint && (
-      apiEndpoint.includes('localhost') || apiEndpoint.includes('127.0.0.1')
-    );
-    if (!apiKey && !isLocalhost) {
-      throw new Error('请先在API设置中配置API密钥');
-    }
-
-    const isChat = operationType === 'chat';
-    const shouldUseStream = isChat ? streamChat : streamTranslate;
-    let messagesForAPI = [];
-    let systemPromptContent = '';
-
-    if (isChat) {
-      systemPromptContent = '你是一位AI助手，请用与用户相同的语言简洁回复。';
-      if (chatHistoryContext.length === 0 || chatHistoryContext[0].role !== 'system') {
-        messagesForAPI.push({ role: 'system', content: systemPromptContent });
+    return new Promise((resolve, reject) => {
+      const port = chrome.runtime.connect({ name: 'api-stream' });
+      
+      if (signal) {
+        signal.addEventListener('abort', () => {
+          port.postMessage({ action: 'abort' });
+          reject(new DOMException('Aborted by user', 'AbortError'));
+        });
       }
-      messagesForAPI = messagesForAPI.concat(chatHistoryContext);
-    } else {
-      if (operationType === 'polish') {
-        systemPromptContent = `
-你是一位专业的双语编辑，擅长文本润色。
-当用户提供一段文本时：
-首先，你必须识别出文本的原始语言。
-然后，使用【与原始文本完全相同的语言】进行润色，使其更流畅、准确，并保持原意。
-最后，请你【用中文】向用户解释你做了哪些关键的修改以及为什么这么修改。
-例如，如果用户输入英文："He go to school yesterday."
-你的输出应该是：
-He went to school yesterday.
-(中文解释：将动词 "go" 改为过去式 "went" 以匹配时间状语 "yesterday"。)
-请直接开始处理用户接下来的输入。`;
-      } else if (operationType === 'dictionary') {
-        systemPromptContent = `
-你是一个博学的中英双语词典机器人，并且擅长词源分析。
-对于用户输入的单词或短语：
-1.  请给出其最核心的【中文释义】。
-2.  请给出其最核心的【英文释义】。
-3.  如果适用，请指出其主要【词性】。
-4.  **【词根词缀分析】（如果适用）：** 请简要分析该单词的词根 (root)、前缀 (prefix)、后缀 (suffix) 及其含义，帮助理解词义构成。如果是短语或无法分析的简单词，可以注明"无明显词根词缀"或省略此项。
-5.  提供1-2个包含该词或短语的【中英双语对照例句】或【英文例句附中文翻译】。
-请确保输出清晰、准确、易懂。
-例如，输入 "unbelievable":
-正确写法：Unbelievable
-词性：adj.
-中文释义：难以置信的，不可相信的
-英文释义：Difficult to believe; extraordinary.
-词根词缀分析：
-  - un- (前缀)：表示"不，非"
-  - believe (词根)：相信，信任
-  - -able (后缀)：表示"能够...的，值得...的"
-例句：
-  - His story about seeing a UFO was completely unbelievable. (他说的看见UFO的故事完全令人难以置信。)
-又例如，输入 "apple":
-正确写法：Apple
-词性：n.
-中文释义：苹果
-英文释义：A round fruit with firm, white flesh and a green or red skin.
-词根词缀分析：无明显词根词缀
-例句：
-  - An apple a day keeps the doctor away. (一天一苹果，医生远离我。)
-请直接开始处理用户接下来的输入。`;
-      } else {
-        const targetLangValue = langSelect ? langSelect.value : 'zh';
-        const langMap = { 'zh': '中文', 'en': '英文', 'ja': '日文', 'ko': '韩文' };
-        systemPromptContent = `你是一位专业的翻译引擎。请自动检测用户输入文本的源语言，然后将其准确地翻译成【${langMap[targetLangValue] || '中文'}】。请直接输出翻译结果，不要包含任何额外说明或源语言的识别信息。`;
-      }
-      messagesForAPI.push({ role: 'system', content: systemPromptContent });
-      if (text) messagesForAPI.push({ role: 'user', content: text });
-    }
 
-    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
-    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
-
-    const response = await fetch(`${apiEndpoint}/chat/completions`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        model,
-        messages: messagesForAPI,
-        temperature: 0.7,
-        top_p: 1,
-        max_tokens: 4096,
-        stream: shouldUseStream
-      }),
-      signal: signal
-    });
-
-    if (!response.ok) {
-      let errorResponseMessage = `API返回状态: ${response.status} ${response.statusText || '(没有状态文本)'}`;
-      if (response.body) {
-        try {
-          const contentType = response.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const errorData = await response.json();
-            errorResponseMessage = errorData.error?.message || errorData.message || JSON.stringify(errorData);
-          } else {
-            const errorText = await response.text();
-            errorResponseMessage = errorText || errorResponseMessage;
-          }
-        } catch (e) {
-          console.error('处理API错误响应体时出错:', e);
-        }
-      }
-      if (response.status === 403 && isLocalhost) {
-        errorResponseMessage += ' (对于本地Ollama，请检查OLLAMA_ORIGINS环境变量是否正确配置以允许插件访问)';
-      }
-      throw new Error(`请求失败 (${response.status}): ${errorResponseMessage}`);
-    }
-
-    let rawAssistantResponse = '';
-
-    /* ========== Streaming ========== */
-    if (shouldUseStream) {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      const isChat = operationType === 'chat';
       let rawReasoningAccumulator = '';
       let rawContentAccumulator = '';
       let tempAssistantUIDiv = null;
@@ -484,84 +369,47 @@ He went to school yesterday.
         if (translateOutput) translateOutput.value = '';
       }
 
-      try {
-        let streamBuffer = '';
-        while (true) {
-          if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
-          const { done, value } = await reader.read();
-          if (done) break;
-          streamBuffer += decoder.decode(value, { stream: true });
-          
-          let lineEndIndex;
-          while ((lineEndIndex = streamBuffer.indexOf('\n')) !== -1) {
-            const line = streamBuffer.substring(0, lineEndIndex).trim();
-            streamBuffer = streamBuffer.substring(lineEndIndex + 1);
-            
-            if (line.startsWith('data: ')) {
-              const jsonData = line.substring('data: '.length).trim();
-              if (jsonData.toUpperCase() === '[DONE]') continue;
-              try {
-                const parsed = JSON.parse(jsonData);
-                const contentChunk = parsed.choices[0]?.delta?.content || '';
-                const reasoningChunk = parsed.choices[0]?.delta?.reasoning_content || '';
+      port.postMessage({
+        action: 'callAPI',
+        text,
+        operationType,
+        chatHistoryContext,
+        targetLangValue: langSelect ? langSelect.value : 'zh'
+      });
 
-                if (reasoningChunk) {
-                  rawReasoningAccumulator += reasoningChunk;
-                }
-                if (contentChunk) {
-                  rawContentAccumulator += contentChunk;
-                  if (isChat && tempAssistantUIDiv) {
-                    const displayText = rawContentAccumulator
-                      .replace(/<think>[\s\S]*?<\/think>/ig, '')
-                      .replace(/<think>[\s\S]*$/i, '')
-                      .trim();
-                    const contentNode = tempAssistantUIDiv.querySelector('.message-content');
-                    if (contentNode) {
-                      contentNode.innerHTML = escapeHtml(displayText).replace(/\n/g, '<br>');
-                    }
-                    if (messageContainer) messageContainer.scrollTop = messageContainer.scrollHeight;
-                  } else if (translateOutput) {
-                    translateOutput.value += contentChunk;
-                    translateOutput.scrollTop = translateOutput.scrollHeight;
-                  }
-                }
-              } catch (err) {
-                console.error('Failed to parse streaming line:', err, 'Line content:', line);
+      port.onMessage.addListener((msg) => {
+        if (msg.type === 'chunk') {
+          const { contentChunk, reasoningChunk } = msg;
+          if (reasoningChunk) rawReasoningAccumulator += reasoningChunk;
+          if (contentChunk) {
+            rawContentAccumulator += contentChunk;
+            if (isChat && tempAssistantUIDiv) {
+              const displayText = rawContentAccumulator
+                .replace(/<think>[\s\S]*?<\/think>/ig, '')
+                .replace(/<think>[\s\S]*$/i, '')
+                .trim();
+              const contentNode = tempAssistantUIDiv.querySelector('.message-content');
+              if (contentNode) {
+                contentNode.innerHTML = escapeHtml(displayText).replace(/\n/g, '<br>');
               }
+              if (messageContainer) messageContainer.scrollTop = messageContainer.scrollHeight;
+            } else if (translateOutput) {
+              translateOutput.value += contentChunk;
+              translateOutput.scrollTop = translateOutput.scrollHeight;
             }
           }
+        } else if (msg.type === 'done') {
+          if (isChat) {
+            if (tempAssistantUIDiv) tempAssistantUIDiv.remove();
+            addMessageToChat('assistant', msg.result, true);
+          }
+          resolve(msg.result);
+        } else if (msg.type === 'error') {
+          if (isChat && tempAssistantUIDiv) tempAssistantUIDiv.remove();
+          reject(new Error(msg.error));
         }
-      } catch (streamError) {
-        if (isChat && tempAssistantUIDiv) tempAssistantUIDiv.remove();
-        throw streamError;
-      }
-
-      if (isChat) {
-        rawAssistantResponse = '';
-        if (rawReasoningAccumulator) {
-          rawAssistantResponse += `<think>${rawReasoningAccumulator}</think>`;
-        }
-        rawAssistantResponse += rawContentAccumulator;
-        if (tempAssistantUIDiv) tempAssistantUIDiv.remove();
-        addMessageToChat('assistant', rawAssistantResponse, true);
-        return rawAssistantResponse;
-      }
-      return rawContentAccumulator;
-
-    /* ========== Non-streaming ========== */
-    } else {
-      const data = await response.json();
-      const content = data.choices[0]?.message?.content?.trim() || '';
-      if (isChat) {
-        const reasoningContent = data.choices[0]?.message?.reasoning_content || '';
-        rawAssistantResponse = reasoningContent
-          ? `<think>${reasoningContent}</think>` + content
-          : content;
-        addMessageToChat('assistant', rawAssistantResponse, true);
-        return rawAssistantResponse;
-      }
-      return content;
-    }
+      });
+    });
   }
 
   /* ==================== Event Listeners ==================== */
