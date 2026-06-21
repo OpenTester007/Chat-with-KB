@@ -2,15 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.5.1] - 2026-06-20
+## [3.5.1] - 2026-06-22
 
 ### Added
 - English README with screenshots and installation guide
 - CODE_OF_CONDUCT.md (Contributor Covenant v2.0)
 - CHANGELOG.md (this file)
+- GitHub Actions CI/CD build workflows (`.github/workflows/build.yml`)
+- Issue templates for bug reports and feature requests
 
 ### Changed
 - README rewritten in English
+- Migrated API request logic to a background service worker (`background.js`) to prevent translation interruption on popup close
+- Persisted chat history in `chrome.storage.local` to prevent history loss on popup close
+- Refactored streaming SSE parser with a robust line buffer to prevent TCP packet fragmentation crashes
 
 ## [3.5.0] - 2026-06-20
 
