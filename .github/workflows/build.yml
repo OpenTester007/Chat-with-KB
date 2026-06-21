@@ -1,0 +1,29 @@
+name: Build and Package Extension
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Verify manifest.json
+      run: |
+        jq . manifest.json || (echo "manifest.json is invalid JSON!" && exit 1)
+
+    - name: Create Release Zip
+      run: |
+        zip -r ai-translator.zip . -x "*.git*" "*node_modules*" "*.github*" "*.workbuddy*" "*.agents*" "*.gemini*" "scratch*" "task.md" "implementation_plan.md" "walkthrough.md" "AGENTS.md" "*.zip"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ai-translator-extension
+        path: ai-translator.zip

@@ -253,10 +253,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==================== Chat ==================== */
-  function startNewChatSession() {
+  async function startNewChatSession() {
     currentChatHistory = [];
+    await chrome.storage.local.set({ chatHistory: [] });
     if (messageContainer) messageContainer.innerHTML = '';
     addMessageToChat('assistant', '您好！我是您的AI助手，新的聊天会话已开始。', false);
+    if (chatInput) chatInput.focus();
+  }
+
+  async function loadChatHistory() {
+    const data = await chrome.storage.local.get({ chatHistory: [] });
+    currentChatHistory = data.chatHistory || [];
+    if (messageContainer) {
+      messageContainer.innerHTML = '';
+      if (currentChatHistory.length === 0) {
+        addMessageToChat('assistant', '您好！我是您的AI助手，新的聊天会话已开始。', false);
+      } else {
+        currentChatHistory.forEach(msg => {
+          addMessageToChat(msg.role, msg.content, false);
+        });
+      }
+    }
+  }
+
+  async function initializeChatSession() {
+    await loadChatHistory();
     if (chatInput) chatInput.focus();
   }
 
@@ -313,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
           chatTurns = chatTurns.slice(-MAX_CHAT_HISTORY_TURNS * 2);
         }
         currentChatHistory = systemPrompt ? [systemPrompt, ...chatTurns] : chatTurns;
+        chrome.storage.local.set({ chatHistory: currentChatHistory });
       }
     }
     return messageDiv;
@@ -463,47 +485,48 @@ He went to school yesterday.
       }
 
       try {
+        let streamBuffer = '';
         while (true) {
           if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
           const { done, value } = await reader.read();
           if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          const eventLines = chunk.split('\n\n');
-          for (const eventLine of eventLines) {
-            if (eventLine.trim() === '') continue;
-            const lines = eventLine.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const jsonData = line.substring('data: '.length);
-                if (jsonData.trim().toUpperCase() === '[DONE]') continue;
-                try {
-                  const parsed = JSON.parse(jsonData);
-                  const contentChunk = parsed.choices[0]?.delta?.content || '';
-                  const reasoningChunk = parsed.choices[0]?.delta?.reasoning_content || '';
+          streamBuffer += decoder.decode(value, { stream: true });
+          
+          let lineEndIndex;
+          while ((lineEndIndex = streamBuffer.indexOf('\n')) !== -1) {
+            const line = streamBuffer.substring(0, lineEndIndex).trim();
+            streamBuffer = streamBuffer.substring(lineEndIndex + 1);
+            
+            if (line.startsWith('data: ')) {
+              const jsonData = line.substring('data: '.length).trim();
+              if (jsonData.toUpperCase() === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(jsonData);
+                const contentChunk = parsed.choices[0]?.delta?.content || '';
+                const reasoningChunk = parsed.choices[0]?.delta?.reasoning_content || '';
 
-                  if (reasoningChunk) {
-                    rawReasoningAccumulator += reasoningChunk;
-                  }
-                  if (contentChunk) {
-                    rawContentAccumulator += contentChunk;
-                    if (isChat && tempAssistantUIDiv) {
-                      const displayText = rawContentAccumulator
-                        .replace(/<think>[\s\S]*?<\/think>/ig, '')
-                        .replace(/<think>[\s\S]*$/i, '')
-                        .trim();
-                      const contentNode = tempAssistantUIDiv.querySelector('.message-content');
-                      if (contentNode) {
-                        contentNode.innerHTML = escapeHtml(displayText).replace(/\n/g, '<br>');
-                      }
-                      if (messageContainer) messageContainer.scrollTop = messageContainer.scrollHeight;
-                    } else if (translateOutput) {
-                      translateOutput.value += contentChunk;
-                      translateOutput.scrollTop = translateOutput.scrollHeight;
-                    }
-                  }
-                } catch (err) {
-                  console.error('Failed to parse streaming chunk:', err);
+                if (reasoningChunk) {
+                  rawReasoningAccumulator += reasoningChunk;
                 }
+                if (contentChunk) {
+                  rawContentAccumulator += contentChunk;
+                  if (isChat && tempAssistantUIDiv) {
+                    const displayText = rawContentAccumulator
+                      .replace(/<think>[\s\S]*?<\/think>/ig, '')
+                      .replace(/<think>[\s\S]*$/i, '')
+                      .trim();
+                    const contentNode = tempAssistantUIDiv.querySelector('.message-content');
+                    if (contentNode) {
+                      contentNode.innerHTML = escapeHtml(displayText).replace(/\n/g, '<br>');
+                    }
+                    if (messageContainer) messageContainer.scrollTop = messageContainer.scrollHeight;
+                  } else if (translateOutput) {
+                    translateOutput.value += contentChunk;
+                    translateOutput.scrollTop = translateOutput.scrollHeight;
+                  }
+                }
+              } catch (err) {
+                console.error('Failed to parse streaming line:', err, 'Line content:', line);
               }
             }
           }
@@ -576,7 +599,7 @@ He went to school yesterday.
       initAPIConfig();
       isSettingsInitialized = true;
     } else if (targetTabId === 'chat' && !isChatInitialized) {
-      startNewChatSession();
+      initializeChatSession();
       isChatInitialized = true;
     } else if (targetTabId === 'history') {
       initializeHistory();
