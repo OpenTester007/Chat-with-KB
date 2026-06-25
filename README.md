@@ -4,17 +4,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-> Translation and assistant browser extension — Chinese, English, Japanese, Korean. Free. Works out of the box.
+> Translation and assistant browser extension for Chinese, English, Japanese, and Korean.
 
 ![Extension Screenshot](screenshots/translate-store.png)
 
 ## Features
 
-- **Translation** — Translate between Chinese, English, Japanese, and Korean. Auto-detects source language.
-- **Text Polishing** — Polishes text and explains changes in Chinese.
-- **Dictionary** — Definitions, parts of speech, root/affix analysis, and bilingual example sentences.
-- **Chat** — Sidebar chat assistant with conversation memory.
-- **History** — Saves the last 10 records.
+- **Translation**: Translate between Chinese, English, Japanese, and Korean. Auto-detects source language.
+- **Text Polishing**: Polish text and explain changes in Chinese.
+- **Dictionary**: Definitions, parts of speech, root/affix analysis, and bilingual example sentences.
+- **Chat**: Sidebar chat assistant with conversation memory.
+- **History**: Saves the last 10 translation records locally.
 
 ## Installation
 
@@ -34,25 +34,25 @@
    git clone https://github.com/OpenTester007/Chat-with-KB.git
    ```
 2. Open `edge://extensions/` in Microsoft Edge.
-3. Enable **Developer mode** (toggle in the bottom-left).
+3. Enable **Developer mode**.
 4. Click **Load unpacked** and select the cloned folder.
-5. The extension should now appear in your toolbar.
+5. Open the extension Settings tab and configure your API key.
 
 ## Configuration
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| **API Key** | *(pre-configured)* | Your NVIDIA Build API key. [Get a free key →](https://build.nvidia.com) |
-| **API Endpoint** | `https://integrate.api.nvidia.com/v1` | Customize for OpenAI-compatible providers. |
+| **API Key** | empty | Add your own NVIDIA Build or OpenAI-compatible provider key. |
+| **API Endpoint** | `https://integrate.api.nvidia.com/v1` | Customize for OpenAI-compatible providers. Remote endpoints must use HTTPS. |
 | **Model** | `openai/gpt-oss-20b` | Choose from presets or enter any model ID. |
-| **Streaming** | *On* | Toggle between real-time streaming and batch responses. |
+| **Streaming** | On | Toggle between real-time streaming and batch responses. |
 
 ### Supported Models (Presets)
 
 | Model | Type |
 |-------|------|
 | `openai/gpt-oss-20b` | Reasoning (default) |
-| `deepseek-ai/deepseek-v4-flash` | Chat (MoE, 284B) |
+| `deepseek-ai/deepseek-v4-flash` | Chat |
 | `meta/llama-3.3-70b-instruct` | Chat |
 | `google/gemma-4-31b-it` | Chat |
 
@@ -63,20 +63,22 @@ You can also enter any custom OpenAI-compatible model ID.
 To use a local Ollama instance, set the environment variable and configure the endpoint:
 
 ```bash
-# Set environment variable before starting Ollama
 set OLLAMA_ORIGINS=*
 ollama serve
 ```
 
 Then in the extension settings, set:
 - **API Endpoint**: `http://localhost:11434/v1`
-- **Model**: your Ollama model name (e.g., `llama3`, `qwen2.5`, `mistral`)
+- **Model**: your Ollama model name, such as `llama3`, `qwen2.5`, or `mistral`
+- **API Key**: leave empty for local endpoints that do not require a key
+
+Remote non-local HTTP endpoints are intentionally blocked; use HTTPS for hosted providers.
 
 ## Tech Stack
 
 - **Manifest V3**
-- **Vanilla JavaScript** — No frameworks
-- **NVIDIA Build API** (OpenAI-compatible)
+- **Vanilla JavaScript**
+- **OpenAI-compatible Chat Completions API**
 
 ## Development
 
@@ -86,34 +88,37 @@ cd Chat-with-KB
 # Load unpacked in edge://extensions/ (Developer mode)
 ```
 
-Edit `popup.js`, `popup.html`, or `style.css`, then reload the extension from `edge://extensions/`.
+Edit `popup.js`, `popup.html`, `background.js`, or `style.css`, then reload the extension from `edge://extensions/`.
+
+Basic checks:
+
+```bash
+node --check popup.js
+node --check background.js
+```
 
 ## Project Structure
 
-```
-├── manifest.json          # Extension manifest (MV3)
-├── popup.html             # Main popup UI
-├── popup.js               # Application logic
-├── style.css              # Styles
-├── screenshots/           # Screenshots for documentation
-├── 16.png / 32.png        # Extension icons
-├── 48.png / 128.png       # Extension icons (larger)
-├── LICENSE                # MIT License
-├── CONTRIBUTING.md        # Contribution guidelines
-├── CODE_OF_CONDUCT.md     # Community code of conduct
-├── ROADMAP.md             # Planned features
-└── CHANGELOG.md           # Release history
+```text
+manifest.json          # Extension manifest (MV3)
+background.js          # Service worker and API request handling
+popup.html             # Main popup UI
+popup.js               # Popup UI logic
+style.css              # Styles
+screenshots/           # Screenshots for documentation
+16.png / 32.png        # Extension icons
+48.png / 128.png       # Extension icons
+LICENSE                # MIT License
+CONTRIBUTING.md        # Contribution guidelines
+CODE_OF_CONDUCT.md     # Community code of conduct
+ROADMAP.md             # Planned features
+CHANGELOG.md           # Release history
 ```
 
-## Contributing
+## Privacy
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Settings, chat history, and translation history are stored locally with the browser storage API. Text entered by the user is sent to the configured API provider for processing.
 
 ## License
 
-MIT © [AI-based Translator Contributors](LICENSE)
-
-## Credits
-
-- Default API: [NVIDIA Build](https://build.nvidia.com)
-- Uses [OpenAI-compatible API](https://platform.openai.com/docs/api-reference)
+MIT, see [LICENSE](LICENSE).

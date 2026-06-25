@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- Removed the embedded default API key; users now configure their own key.
+- Tightened extension permissions and blocked remote non-local HTTP API endpoints.
+- Replaced unsafe dynamic HTML rendering for popup-generated content.
+- Added JavaScript syntax checks to CI.
+
+### Fixed
+- Prevented translation history from being saved twice.
+- Repaired corrupted popup UI text, privacy policy, README, and issue templates.
+
 ## [3.5.1] - 2026-06-22
 
 ### Added
