@@ -1,19 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-  /* ==================== Constants ==================== */
-  const MAX_HISTORY_ITEMS = 10;
   const MAX_CHAT_HISTORY_TURNS = 5;
-  // NOTE FOR EDGE ADD-ONS REVIEWERS:
-  // This NVIDIA Build API key is intentionally embedded by the author for
-  // out-of-the-box usage. It is a free-tier key subject to NVIDIA platform
-  // rate limits. Users may replace it with their own key in the Settings
-  // page at any time. The author assumes full responsibility for this key.
-  // 作者声明: 此 API key 为作者本人有意公开, 用于开箱即用体验;
-  // 受 NVIDIA 平台限速控制, 用户可在「设置」页替换为自己的 key。
-  const DEFAULT_API_KEY = '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';
+  const DEFAULT_API_KEY = '';
   const DEFAULT_API_ENDPOINT = 'https://integrate.api.nvidia.com/v1';
   const DEFAULT_MODEL = 'openai/gpt-oss-20b';
 
-  /* ==================== DOM References ==================== */
   const tabNav = document.querySelector('.tab-nav');
   const apiKeyInput = document.getElementById('apiKey');
   const apiEndpointInput = document.getElementById('apiEndpoint');
@@ -40,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const historyList = document.getElementById('historyList');
   const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
-  /* ==================== State ==================== */
   let currentChatHistory = [];
   let isMainOperationInProgress = false;
   let currentMainOperationAbortController = null;
@@ -49,15 +38,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let isSettingsInitialized = false;
   let isChatInitialized = false;
 
-  /* ==================== Utilities ==================== */
-  function escapeHtml(unsafe) {
-    if (typeof unsafe !== 'string') return '';
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  function stripThinkBlock(text) {
+    return String(text || '').replace(/<think>[\s\S]*?<\/think>/ig, '').trim();
+  }
+
+  function setTextWithLineBreaks(element, text) {
+    element.textContent = '';
+    String(text || '').split('\n').forEach((line, index) => {
+      if (index > 0) element.appendChild(document.createElement('br'));
+      element.appendChild(document.createTextNode(line));
+    });
   }
 
   function brieflyChangeButtonState(button, tempText, duration = 1500) {
@@ -65,14 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const originalText = button.textContent;
     const wasDisabled = button.disabled;
     button.textContent = tempText;
-    if (button.id !== 'copyThinkBtn') {
-      button.disabled = true;
-    }
+    if (button.id !== 'copyThinkBtn') button.disabled = true;
     setTimeout(() => {
       button.textContent = originalText;
-      if (button.id !== 'copyThinkBtn') {
-        button.disabled = wasDisabled;
-      }
+      if (button.id !== 'copyThinkBtn') button.disabled = wasDisabled;
     }, duration);
   }
 
@@ -81,20 +67,39 @@ document.addEventListener('DOMContentLoaded', () => {
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
-    setTimeout(() => { toast.classList.add('show'); }, 10);
+    setTimeout(() => toast.classList.add('show'), 10);
     setTimeout(() => {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }
 
-  /* ==================== Config ==================== */
+  function isLocalEndpoint(url) {
+    return url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  }
+
+  function normalizeEndpoint(rawEndpoint) {
+    const endpoint = rawEndpoint || DEFAULT_API_ENDPOINT;
+    const url = new URL(endpoint);
+    if (url.protocol !== 'https:' && !(url.protocol === 'http:' && isLocalEndpoint(url))) {
+      throw new Error('API 端点必须使用 HTTPS，或使用本机 http://localhost / http://127.0.0.1。');
+    }
+    return url.toString().replace(/\/$/, '');
+  }
+
+  function getPermissionPattern(endpoint) {
+    const url = new URL(endpoint);
+    if (isLocalEndpoint(url)) {
+      return `${url.protocol}//${url.hostname}/*`;
+    }
+    return `${url.protocol}//${url.hostname}/*`;
+  }
+
   async function ensureDefaultConfig() {
     const data = await chrome.storage.local.get([
-      'apiKey', 'apiEndpoint', 'model', 'streamTranslate', 'streamChat'
+      'apiEndpoint', 'model', 'streamTranslate', 'streamChat'
     ]);
     const defaults = {};
-    if (!data.apiKey) defaults.apiKey = DEFAULT_API_KEY;
     if (!data.apiEndpoint) defaults.apiEndpoint = DEFAULT_API_ENDPOINT;
     if (!data.model) defaults.model = DEFAULT_MODEL;
     if (typeof data.streamTranslate !== 'boolean') defaults.streamTranslate = true;
@@ -106,27 +111,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function saveAPIConfig() {
     const apiKey = apiKeyInput.value.trim();
-    const apiEndpoint = apiEndpointInput.value.trim() || DEFAULT_API_ENDPOINT;
     const model = modelInput.value.trim() || DEFAULT_MODEL;
+
     try {
-      const url = new URL(apiEndpoint);
-      const origin = `${url.protocol}//${url.hostname}/*`;
+      const apiEndpoint = normalizeEndpoint(apiEndpointInput.value.trim());
+      const origin = getPermissionPattern(apiEndpoint);
       const hasPermission = await chrome.permissions.contains({ origins: [origin] });
       if (!hasPermission) {
         const granted = await chrome.permissions.request({ origins: [origin] });
         if (!granted) {
-          showToast('需要授予权限才能访问该端点', 'error');
+          showToast('需要授权后才能访问该 API 端点。', 'error');
           return;
         }
       }
+
       await chrome.storage.local.set({
-        apiKey, apiEndpoint, model,
+        apiKey,
+        apiEndpoint,
+        model,
         streamTranslate: streamTranslateCheckbox.checked,
         streamChat: streamChatCheckbox.checked
       });
-      brieflyChangeButtonState(saveApiKeyBtn, '已保存!');
+      brieflyChangeButtonState(saveApiKeyBtn, '已保存');
     } catch (error) {
-      showToast('保存失败: ' + error.message, 'error');
+      showToast('保存失败：' + error.message, 'error');
     }
   }
 
@@ -141,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
     streamChatCheckbox.checked = typeof data.streamChat === 'boolean' ? data.streamChat : true;
   }
 
-  /* ==================== Translation ==================== */
   async function handleTextOperation(type) {
     const inputVal = translateInput.value.trim();
     const operationName = type === 'polish' ? '润色' : type === 'dictionary' ? '查询' : '翻译';
@@ -170,14 +177,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await callAPI(inputVal, type, [], currentMainOperationAbortController.signal);
       if (typeof result === 'string') {
         translateOutput.value = result;
-        addTranslationToHistory(inputVal, result, type);
+        if (document.getElementById('history') && !document.getElementById('history').hidden) {
+          await initializeHistory();
+        }
       }
     } catch (error) {
       if (error.name === 'AbortError') {
         translateOutput.value = '操作已取消。';
       } else {
-        showToast(`${operationName}失败: ${error.message}`, 'error');
-        translateOutput.value = `错误: ${error.message}`;
+        showToast(`${operationName}失败：${error.message}`, 'error');
+        translateOutput.value = `错误：${error.message}`;
       }
     } finally {
       isMainOperationInProgress = false;
@@ -193,27 +202,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* ==================== History ==================== */
-  async function addTranslationToHistory(original, result, type) {
-    const data = await chrome.storage.local.get({ translationHistory: [] });
-    let history = data.translationHistory;
-    if (!Array.isArray(history)) history = [];
-    const currentLang = langSelect ? langSelect.value : 'auto';
-    const newEntry = {
-      timestamp: new Date().toISOString(), original, result, type,
-      lang: type === 'polish' || type === 'dictionary' ? 'auto' : currentLang
-    };
-    history.unshift(newEntry);
-    const limitedHistory = history.slice(0, MAX_HISTORY_ITEMS);
-    await chrome.storage.local.set({ translationHistory: limitedHistory });
-    if (document.getElementById('history') && !document.getElementById('history').hidden) {
-      updateHistoryList(limitedHistory);
-    }
+  function appendTextBlock(parent, className, text) {
+    const div = document.createElement('div');
+    div.className = className;
+    setTextWithLineBreaks(div, text);
+    parent.appendChild(div);
   }
 
   function updateHistoryList(history) {
     if (!historyList) return;
-    historyList.innerHTML = '';
+    historyList.textContent = '';
     if (!history || history.length === 0) {
       const li = document.createElement('li');
       li.textContent = '暂无历史记录';
@@ -221,22 +219,30 @@ document.addEventListener('DOMContentLoaded', () => {
       historyList.appendChild(li);
       return;
     }
+
     history.forEach(item => {
       const li = document.createElement('li');
       const resultString = typeof item.result === 'string' ? item.result : '';
       const originalString = typeof item.original === 'string' ? item.original : '';
       const typeString = typeof item.type === 'string' ? item.type : '未知';
-      const cleanedResult = resultString.replace(/<think>[\s\S]*?<\/think>/ig, '').trim();
-      const formattedResult = escapeHtml(cleanedResult).replace(/\n/g, '<br>');
-      li.innerHTML = `
-        <div class="history-item-meta">
-          <span>[${escapeHtml(typeString)}]</span>
-          <span class="history-item-time">${new Date(item.timestamp).toLocaleString()}</span>
-        </div>
-        <div class="history-item-original">${escapeHtml(originalString)}</div>
-        <div class="history-item-separator">➔</div>
-        <div class="history-item-content">${formattedResult}</div>
-      `;
+      const cleanedResult = stripThinkBlock(resultString);
+
+      const meta = document.createElement('div');
+      meta.className = 'history-item-meta';
+
+      const typeSpan = document.createElement('span');
+      typeSpan.textContent = `[${typeString}]`;
+      meta.appendChild(typeSpan);
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'history-item-time';
+      timeSpan.textContent = new Date(item.timestamp).toLocaleString();
+      meta.appendChild(timeSpan);
+
+      li.appendChild(meta);
+      appendTextBlock(li, 'history-item-original', originalString);
+      appendTextBlock(li, 'history-item-separator', '→');
+      appendTextBlock(li, 'history-item-content', cleanedResult);
       historyList.appendChild(li);
     });
   }
@@ -249,31 +255,31 @@ document.addEventListener('DOMContentLoaded', () => {
   async function clearHistory() {
     await chrome.storage.local.set({ translationHistory: [] });
     updateHistoryList([]);
-    if (clearHistoryBtn) brieflyChangeButtonState(clearHistoryBtn, '已清除!');
+    if (clearHistoryBtn) brieflyChangeButtonState(clearHistoryBtn, '已清除');
   }
 
-  /* ==================== Chat ==================== */
   async function startNewChatSession() {
     currentChatHistory = [];
     await chrome.storage.local.set({ chatHistory: [] });
-    if (messageContainer) messageContainer.innerHTML = '';
-    addMessageToChat('assistant', '您好！我是您的AI助手，新的聊天会话已开始。', false);
+    if (messageContainer) messageContainer.textContent = '';
+    addMessageToChat('assistant', '您好，我是您的 AI 助手，新的聊天会话已开始。', false);
     if (chatInput) chatInput.focus();
   }
 
   async function loadChatHistory() {
     const data = await chrome.storage.local.get({ chatHistory: [] });
-    currentChatHistory = data.chatHistory || [];
-    if (messageContainer) {
-      messageContainer.innerHTML = '';
-      if (currentChatHistory.length === 0) {
-        addMessageToChat('assistant', '您好！我是您的AI助手，新的聊天会话已开始。', false);
-      } else {
-        currentChatHistory.forEach(msg => {
-          addMessageToChat(msg.role, msg.content, false);
-        });
-      }
+    currentChatHistory = Array.isArray(data.chatHistory) ? data.chatHistory : [];
+    if (!messageContainer) return;
+
+    messageContainer.textContent = '';
+    if (currentChatHistory.length === 0) {
+      addMessageToChat('assistant', '您好，我是您的 AI 助手，新的聊天会话已开始。', false);
+      return;
     }
+
+    currentChatHistory.forEach(msg => {
+      addMessageToChat(msg.role, msg.content, false);
+    });
   }
 
   async function initializeChatSession() {
@@ -300,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (error.name === 'AbortError') {
         addMessageToChat('info', '(已停止生成)', false);
       } else {
-        addMessageToChat('error', `请求失败: ${error.message}`, false);
+        addMessageToChat('error', `请求失败：${error.message}`, false);
       }
     } finally {
       isChatSending = false;
@@ -313,19 +319,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function addMessageToChat(role, content, addToHistory = true) {
     if (!messageContainer) return null;
+
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
+
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
-    let rawContent = (typeof content === 'string') ? content : '';
-    let displayContent = rawContent.replace(/<think>[\s\S]*?<\/think>/ig, '').trim();
-    contentDiv.innerHTML = escapeHtml(displayContent).replace(/\n/g, '<br>');
+    const rawContent = typeof content === 'string' ? content : '';
+    const displayContent = stripThinkBlock(rawContent);
+    setTextWithLineBreaks(contentDiv, displayContent);
+
     messageDiv.appendChild(contentDiv);
     messageContainer.appendChild(messageDiv);
     messageContainer.scrollTop = messageContainer.scrollHeight;
 
     if (addToHistory && (role === 'user' || role === 'assistant') && rawContent.trim() !== '') {
-      let contentForHistory = rawContent.replace(/<think>[\s\S]*?<\/think>/ig, '').trim();
+      const contentForHistory = stripThinkBlock(rawContent);
       if (contentForHistory || role === 'user') {
         currentChatHistory.push({ role, content: contentForHistory });
         const systemPrompt = currentChatHistory.find(m => m.role === 'system');
@@ -337,23 +346,34 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.local.set({ chatHistory: currentChatHistory });
       }
     }
+
     return messageDiv;
   }
 
-  /* ==================== API Call ==================== */
   async function callAPI(text, operationType, chatHistoryContext = [], signal = null) {
     return new Promise((resolve, reject) => {
       const port = chrome.runtime.connect({ name: 'api-stream' });
-      
+      let settled = false;
+
+      function finish(callback, value) {
+        if (settled) return;
+        settled = true;
+        try {
+          port.disconnect();
+        } catch (e) {
+          // The port may already be closed by the service worker.
+        }
+        callback(value);
+      }
+
       if (signal) {
         signal.addEventListener('abort', () => {
           port.postMessage({ action: 'abort' });
-          reject(new DOMException('Aborted by user', 'AbortError'));
-        });
+          finish(reject, new DOMException('Aborted by user', 'AbortError'));
+        }, { once: true });
       }
 
       const isChat = operationType === 'chat';
-      let rawReasoningAccumulator = '';
       let rawContentAccumulator = '';
       let tempAssistantUIDiv = null;
 
@@ -365,8 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
         tempAssistantUIDiv.appendChild(contentDiv);
         if (messageContainer) messageContainer.appendChild(tempAssistantUIDiv);
         if (messageContainer) messageContainer.scrollTop = messageContainer.scrollHeight;
-      } else {
-        if (translateOutput) translateOutput.value = '';
+      } else if (translateOutput) {
+        translateOutput.value = '';
       }
 
       port.postMessage({
@@ -379,85 +399,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
       port.onMessage.addListener((msg) => {
         if (msg.type === 'chunk') {
-          const { contentChunk, reasoningChunk } = msg;
-          if (reasoningChunk) rawReasoningAccumulator += reasoningChunk;
-          if (contentChunk) {
-            rawContentAccumulator += contentChunk;
-            if (isChat && tempAssistantUIDiv) {
-              const displayText = rawContentAccumulator
-                .replace(/<think>[\s\S]*?<\/think>/ig, '')
-                .replace(/<think>[\s\S]*$/i, '')
-                .trim();
-              const contentNode = tempAssistantUIDiv.querySelector('.message-content');
-              if (contentNode) {
-                contentNode.innerHTML = escapeHtml(displayText).replace(/\n/g, '<br>');
-              }
-              if (messageContainer) messageContainer.scrollTop = messageContainer.scrollHeight;
-            } else if (translateOutput) {
-              translateOutput.value += contentChunk;
-              translateOutput.scrollTop = translateOutput.scrollHeight;
-            }
+          const { contentChunk } = msg;
+          if (!contentChunk) return;
+
+          rawContentAccumulator += contentChunk;
+          if (isChat && tempAssistantUIDiv) {
+            const displayText = rawContentAccumulator
+              .replace(/<think>[\s\S]*?<\/think>/ig, '')
+              .replace(/<think>[\s\S]*$/i, '')
+              .trim();
+            const contentNode = tempAssistantUIDiv.querySelector('.message-content');
+            if (contentNode) setTextWithLineBreaks(contentNode, displayText);
+            if (messageContainer) messageContainer.scrollTop = messageContainer.scrollHeight;
+          } else if (translateOutput) {
+            translateOutput.value += contentChunk;
+            translateOutput.scrollTop = translateOutput.scrollHeight;
           }
         } else if (msg.type === 'done') {
           if (isChat) {
             if (tempAssistantUIDiv) tempAssistantUIDiv.remove();
             addMessageToChat('assistant', msg.result, true);
           }
-          resolve(msg.result);
+          finish(resolve, msg.result);
         } else if (msg.type === 'error') {
           if (isChat && tempAssistantUIDiv) tempAssistantUIDiv.remove();
-          reject(new Error(msg.error));
+          finish(reject, new Error(msg.error));
         }
       });
     });
   }
 
-  /* ==================== Event Listeners ==================== */
+  if (tabNav) {
+    tabNav.addEventListener('click', (e) => {
+      const button = e.target.closest('.tab-nav__btn');
+      if (!button) return;
+      const currentActiveTabButton = document.querySelector('.tab-nav__btn.is-active');
+      const currentActiveTabId = currentActiveTabButton ? currentActiveTabButton.dataset.tab : null;
+      const targetTabId = button.dataset.tab;
 
-  /* --- Tab Navigation --- */
-  tabNav.addEventListener('click', (e) => {
-    const button = e.target.closest('.tab-nav__btn');
-    if (!button) return;
-    const currentActiveTabButton = document.querySelector('.tab-nav__btn.is-active');
-    const currentActiveTabId = currentActiveTabButton ? currentActiveTabButton.dataset.tab : null;
-    const targetTabId = button.dataset.tab;
+      if (currentActiveTabId === 'translate' && targetTabId !== 'translate'
+          && isMainOperationInProgress && currentMainOperationAbortController) {
+        currentMainOperationAbortController.abort();
+      }
+      if (currentActiveTabId === 'chat' && targetTabId !== 'chat'
+          && isChatSending && currentChatAbortController) {
+        currentChatAbortController.abort();
+      }
 
-    if (currentActiveTabId === 'translate' && targetTabId !== 'translate'
-        && isMainOperationInProgress && currentMainOperationAbortController) {
-      currentMainOperationAbortController.abort();
-    }
-    if (currentActiveTabId === 'chat' && targetTabId !== 'chat'
-        && isChatSending && currentChatAbortController) {
-      currentChatAbortController.abort();
-    }
+      document.querySelectorAll('.tab-nav__btn').forEach(btn => {
+        btn.classList.remove('is-active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.hidden = true;
+      });
+      button.classList.add('is-active');
+      button.setAttribute('aria-selected', 'true');
+      const targetPanel = document.getElementById(targetTabId);
+      if (targetPanel) targetPanel.hidden = false;
 
-    document.querySelectorAll('.tab-nav__btn').forEach(btn => {
-      btn.classList.remove('is-active');
-      btn.setAttribute('aria-selected', 'false');
+      if (targetTabId === 'settings' && !isSettingsInitialized) {
+        initAPIConfig();
+        isSettingsInitialized = true;
+      } else if (targetTabId === 'chat' && !isChatInitialized) {
+        initializeChatSession();
+        isChatInitialized = true;
+      } else if (targetTabId === 'history') {
+        initializeHistory();
+      }
     });
-    document.querySelectorAll('.tab-panel').forEach(panel => {
-      panel.hidden = true;
-    });
-    button.classList.add('is-active');
-    button.setAttribute('aria-selected', 'true');
-    const targetPanel = document.getElementById(targetTabId);
-    if (targetPanel) targetPanel.hidden = false;
+  }
 
-    if (targetTabId === 'settings' && !isSettingsInitialized) {
-      initAPIConfig();
-      isSettingsInitialized = true;
-    } else if (targetTabId === 'chat' && !isChatInitialized) {
-      initializeChatSession();
-      isChatInitialized = true;
-    } else if (targetTabId === 'history') {
-      initializeHistory();
-    }
-  });
-
-  /* --- Settings --- */
   if (saveApiKeyBtn) saveApiKeyBtn.addEventListener('click', saveAPIConfig);
-
-  /* --- Translate Buttons --- */
   if (translateBtn) translateBtn.addEventListener('click', () => {
     if (!isMainOperationInProgress) handleTextOperation('translate');
   });
@@ -468,7 +481,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isMainOperationInProgress) handleTextOperation('dictionary');
   });
 
-  /* --- Clear / Stop --- */
   if (clearOrStopBtn) {
     clearOrStopBtn.addEventListener('click', () => {
       if (isMainOperationInProgress) {
@@ -481,7 +493,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* --- Copy Button --- */
   if (copyThinkBtn && translateOutput) {
     copyThinkBtn.addEventListener('click', () => {
       const outputText = translateOutput.value;
@@ -489,33 +500,20 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('没有可复制的内容', 'error');
         return;
       }
-      const hasThinkBlock = /<think>[\s\S]*?<\/think>/i.test(outputText);
-      let contentToCopy = outputText.replace(/<think>[\s\S]*?<\/think>/ig, '').trim();
-      let buttonFeedbackText = '全文已复制!';
 
-      if (hasThinkBlock) {
-        if (contentToCopy) {
-          buttonFeedbackText = '结论已复制!';
-        } else {
-          showToast('移除思考过程后无结论可复制', 'info');
-          return;
-        }
-      }
+      const hasThinkBlock = /<think>[\s\S]*?<\/think>/i.test(outputText);
+      const contentToCopy = stripThinkBlock(outputText);
       if (!contentToCopy) {
         showToast('没有可复制的内容', 'error');
         return;
       }
+
       navigator.clipboard.writeText(contentToCopy)
-        .then(() => {
-          brieflyChangeButtonState(copyThinkBtn, buttonFeedbackText);
-        })
-        .catch(err => {
-          showToast('复制失败: ' + err.message, 'error');
-        });
+        .then(() => brieflyChangeButtonState(copyThinkBtn, hasThinkBlock ? '结果已复制' : '全文已复制'))
+        .catch(err => showToast('复制失败：' + err.message, 'error'));
     });
   }
 
-  /* --- Chat Send / Stop --- */
   if (sendBtn && chatInput) {
     sendBtn.addEventListener('click', () => {
       if (isChatSending) {
@@ -532,10 +530,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* --- Chat New / History Clear --- */
   if (newChatBtn) newChatBtn.addEventListener('click', startNewChatSession);
   if (clearHistoryBtn) clearHistoryBtn.addEventListener('click', clearHistory);
 
-  /* ==================== Initialize ==================== */
   ensureDefaultConfig();
 });

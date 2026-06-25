@@ -13,8 +13,8 @@
   ],
   "optional_host_permissions": [
     "https://*/*",
-    "http://localhost:*/*",
-    "http://127.0.0.1:*/*"
+    "http://localhost/*",
+    "http://127.0.0.1/*"
   ],
   "content_security_policy": {
     "extension_pages": "default-src 'self'; connect-src https://integrate.api.nvidia.com https: http://localhost:* http://127.0.0.1:*; object-src 'none'"

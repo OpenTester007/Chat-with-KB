@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AI-based Translator — Privacy Policy</title>
+  <title>AI-based Translator - Privacy Policy</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 720px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; color: #333; }
     h1 { font-size: 24px; margin-bottom: 8px; }
@@ -10,41 +10,41 @@
     .updated { color: #666; font-size: 14px; margin-bottom: 24px; }
     ul { padding-left: 20px; }
     li { margin-bottom: 6px; }
-    .contact { background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 32px; }
   </style>
 </head>
 <body>
-  <h1>AI-based Translator — Privacy Policy</h1>
-  <p class="updated">Last updated: June 21, 2026</p>
+  <h1>AI-based Translator - Privacy Policy</h1>
+  <p class="updated">Last updated: June 23, 2026</p>
 
   <h2>1. Data Collection</h2>
-  <p>AI-based Translator <strong>does not collect any personal user data</strong>.</p>
-  <p>All data (including translation history, API settings, and chat records) is stored exclusively in the user's local browser via the Chrome Storage API and is never uploaded to any third-party server operated by the extension developer.</p>
+  <p>AI-based Translator does not collect personal user data on servers operated by the extension developer.</p>
+  <p>API settings, translation history, and chat history are stored locally in the user's browser via the Chrome Storage API.</p>
 
   <h2>2. Third-Party Services</h2>
-  <p>This extension uses the NVIDIA Build free API platform by default for translation and chat functionality. User-input text is transmitted via HTTPS to NVIDIA servers for processing. Users may replace this with any compatible API endpoint in the Settings page.</p>
-  <p>Please review NVIDIA's privacy policy for their data handling practices:</p>
+  <p>This extension sends user-entered text to the API endpoint configured in Settings for translation, dictionary, polishing, or chat responses. The default endpoint is NVIDIA Build's OpenAI-compatible API, but users must provide their own API key or configure another compatible provider.</p>
+  <p>Remote API endpoints must use HTTPS. Local development endpoints are allowed only for <code>localhost</code> or <code>127.0.0.1</code>.</p>
+  <p>Please review the privacy policy of the provider you configure. For NVIDIA Build, see:</p>
   <ul>
     <li><a href="https://www.nvidia.com/en-us/about-nvidia/privacy-policy/" target="_blank" rel="noopener">NVIDIA Privacy Policy</a></li>
   </ul>
 
-  <h2>3. Data Storage</h2>
-  <p>All data is stored locally in the browser:</p>
+  <h2>3. Local Data Storage</h2>
+  <p>The following data may be stored locally in the browser:</p>
   <ul>
-    <li>API key (replaceable with your own key)</li>
-    <li>Model name and API endpoint URL</li>
-    <li>Translation history (last 10 records)</li>
-    <li>Chat history (last 5 conversation turns)</li>
+    <li>API key, API endpoint, and model name</li>
+    <li>Translation history, limited to the last 10 records</li>
+    <li>Chat history, limited to the last 5 conversation turns</li>
   </ul>
-  <p>Clearing browser data or uninstalling the extension will delete all the above information.</p>
+  <p>Clearing browser data or uninstalling the extension will delete this local data.</p>
 
   <h2>4. Permissions Explained</h2>
   <ul>
-    <li><strong>storage</strong> — Used to persist user settings and local history.</li>
-    <li><strong>host_permissions</strong> — Required to call the NVIDIA translation API and any user-configured custom endpoints.</li>
+    <li><strong>storage</strong>: Persists user settings and local history.</li>
+    <li><strong>host permissions</strong>: Allows requests to the default API endpoint.</li>
+    <li><strong>optional host permissions</strong>: Allows users to grant access to a custom HTTPS API endpoint or local development endpoint when they save settings.</li>
   </ul>
 
   <h2>5. Contact</h2>
-  <p>For privacy-related questions, please contact the developer via the Edge Add-ons store or through the project's <a href="https://github.com/OpenTester007/Chat-with-KB/issues">GitHub Issues</a>.</p>
+  <p>For privacy-related questions, please contact the developer through the project's <a href="https://github.com/OpenTester007/Chat-with-KB/issues">GitHub Issues</a>.</p>
 </body>
 </html>

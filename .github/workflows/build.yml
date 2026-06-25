@@ -18,6 +18,11 @@ jobs:
       run: |
         jq . manifest.json || (echo "manifest.json is invalid JSON!" && exit 1)
 
+    - name: Verify JavaScript syntax
+      run: |
+        node --check popup.js
+        node --check background.js
+
     - name: Create Release Zip
       run: |
         zip -r ai-translator.zip . -x "*.git*" "*node_modules*" "*.github*" "*.workbuddy*" "*.agents*" "*.gemini*" "scratch*" "task.md" "implementation_plan.md" "walkthrough.md" "AGENTS.md" "*.zip"
