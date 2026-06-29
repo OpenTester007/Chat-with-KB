@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI-based Translator",
-  "version": "3.5.1",
+  "version": "3.6.0",
   "description": "Chinese, English, Japanese, and Korean AI translation assistant",
   "permissions": ["storage"],
   "background": {
