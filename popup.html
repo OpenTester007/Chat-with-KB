@@ -32,11 +32,11 @@
           </div>
           <label for="output" class="sr-only">输出结果</label>
           <textarea id="output" class="translation-output" placeholder="结果将显示在这里..." readonly rows="8"></textarea>
-          <div class="control-row" style="margin-top:6px; width:100%">
+          <div class="control-row output-actions">
             <button id="copyThinkBtn" class="action-btn">复制结果</button>
           </div>
       </div>
-      <div class="loading-indicator" style="display: none;">
+      <div class="loading-indicator">
         <span class="loading-text">请稍等，正在处理...</span>
       </div>
     </section>
@@ -91,8 +91,8 @@
             </div>
           </div>
         </div>
-        <div style="margin-top: 20px;">
-          <button id="saveApiKeyBtn" class="action-btn full-width" style="padding: 12px;">
+        <div class="settings-save-container">
+          <button id="saveApiKeyBtn" class="action-btn full-width">
             保存设置
           </button>
         </div>
@@ -105,8 +105,8 @@
           <h3 class="text-title">最近 10 条记录</h3>
         </div>
         <div class="history-container">
-          <ul id="historyList" class="history-list" style="margin-top:16px;"></ul>
-          <button id="clearHistoryBtn" class="action-btn full-width" style="margin-top: 14px;">
+          <ul id="historyList" class="history-list"></ul>
+          <button id="clearHistoryBtn" class="action-btn full-width">
             清除历史记录
           </button>
         </div>
