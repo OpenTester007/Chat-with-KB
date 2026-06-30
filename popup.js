@@ -437,14 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentActiveTabId = currentActiveTabButton ? currentActiveTabButton.dataset.tab : null;
       const targetTabId = button.dataset.tab;
 
-      if (currentActiveTabId === 'translate' && targetTabId !== 'translate'
-          && isMainOperationInProgress && currentMainOperationAbortController) {
-        currentMainOperationAbortController.abort();
-      }
-      if (currentActiveTabId === 'chat' && targetTabId !== 'chat'
-          && isChatSending && currentChatAbortController) {
-        currentChatAbortController.abort();
-      }
+
 
       document.querySelectorAll('.tab-nav__btn').forEach(btn => {
         btn.classList.remove('is-active');
