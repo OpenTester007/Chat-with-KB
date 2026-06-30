@@ -526,5 +526,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (newChatBtn) newChatBtn.addEventListener('click', startNewChatSession);
   if (clearHistoryBtn) clearHistoryBtn.addEventListener('click', clearHistory);
 
+  const versionInfo = document.getElementById('versionInfo');
+  if (versionInfo) versionInfo.textContent = `AI-based Translator v${chrome.runtime.getManifest().version}`;
+
   ensureDefaultConfig();
 });
