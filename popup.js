@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (clearHistoryBtn) clearHistoryBtn.addEventListener('click', clearHistory);
 
   const versionInfo = document.getElementById('versionInfo');
-  if (versionInfo) versionInfo.textContent = `AI-based Translator v${chrome.runtime.getManifest().version}`;
+  if (versionInfo) versionInfo.textContent = `v${chrome.runtime.getManifest().version}`;
 
   ensureDefaultConfig();
 });

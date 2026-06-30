@@ -57,7 +57,10 @@
     <section id="settings" class="tab-panel" hidden role="tabpanel" aria-labelledby="settings-tab">
       <div class="config-card elevation-2">
         <div class="config-header">
-          <h3 class="text-title">模型设置</h3>
+          <div class="settings-title-row">
+            <h3 class="text-title">模型设置</h3>
+            <span id="versionInfo"></span>
+          </div>
           <p class="text-body">请前往 <a href="https://build.nvidia.com/models" target="_blank" rel="noopener noreferrer">NVIDIA 模型平台</a> 或其他 OpenAI 兼容平台获取 API 密钥。</p>
         </div>
         <div class="input-group">
@@ -96,7 +99,6 @@
             保存设置
           </button>
         </div>
-        <p id="versionInfo"></p>
       </div>
     </section>
     <section id="history" class="tab-panel" hidden role="tabpanel" aria-labelledby="history-tab">

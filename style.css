@@ -644,11 +644,17 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
+.settings-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
 #versionInfo {
-  margin: 12px 0 0;
-  text-align: center;
   font-size: 11px;
-  color: var(--text-secondary-color);
+  color: var(--text-light-color);
+  font-weight: normal;
 }
 
 /* CSP compliance styles replacing previous inline styles */
