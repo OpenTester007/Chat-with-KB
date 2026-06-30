@@ -650,3 +650,29 @@ body {
   font-size: 11px;
   color: var(--text-secondary-color);
 }
+
+/* CSP compliance styles replacing previous inline styles */
+.loading-indicator {
+  display: none; /* hidden by default, shown via JS */
+}
+
+.control-row.output-actions {
+  margin-top: 6px;
+  width: 100%;
+}
+
+.settings-save-container {
+  margin-top: 20px;
+}
+
+#saveApiKeyBtn {
+  padding: 12px;
+}
+
+#historyList {
+  margin-top: 16px;
+}
+
+#clearHistoryBtn {
+  margin-top: 14px;
+}
