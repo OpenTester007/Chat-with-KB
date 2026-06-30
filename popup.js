@@ -163,6 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     isMainOperationInProgress = true;
     currentMainOperationAbortController = new AbortController();
+    const translateTabBtn = document.getElementById('translate-tab');
+    if (translateTabBtn) translateTabBtn.classList.add('is-running');
     if (clearOrStopBtn) {
       clearOrStopBtn.textContent = '停止';
       clearOrStopBtn.classList.add('stop-btn');
@@ -174,12 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
     translateOutput.value = '';
 
     try {
+      const isStreaming = streamTranslateCheckbox && streamTranslateCheckbox.checked;
       const result = await callAPI(inputVal, type, [], currentMainOperationAbortController.signal);
-      if (typeof result === 'string') {
+      // Bug 3 fix: skip overwrite if streaming already filled the output incrementally
+      if (typeof result === 'string' && !isStreaming) {
         translateOutput.value = result;
-        if (document.getElementById('history') && !document.getElementById('history').hidden) {
-          await initializeHistory();
-        }
+      }
+      if (document.getElementById('history') && !document.getElementById('history').hidden) {
+        await initializeHistory();
       }
     } catch (error) {
       if (error.name === 'AbortError') {
@@ -190,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } finally {
       isMainOperationInProgress = false;
+      if (translateTabBtn) translateTabBtn.classList.remove('is-running');
       if (clearOrStopBtn) {
         clearOrStopBtn.textContent = '清空';
         clearOrStopBtn.classList.remove('stop-btn');
@@ -443,8 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentActiveTabButton = document.querySelector('.tab-nav__btn.is-active');
       const currentActiveTabId = currentActiveTabButton ? currentActiveTabButton.dataset.tab : null;
       const targetTabId = button.dataset.tab;
-
-
 
       document.querySelectorAll('.tab-nav__btn').forEach(btn => {
         btn.classList.remove('is-active');
