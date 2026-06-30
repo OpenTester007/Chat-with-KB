@@ -373,6 +373,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { once: true });
       }
 
+      // Handle unexpected port disconnect (e.g. service worker crash).
+      // Without this, the promise would hang forever and loading never clears.
+      port.onDisconnect.addListener(() => {
+        if (settled) return;
+        finish(reject, new Error('后台连接已断开，请重试。'));
+      });
+
       const isChat = operationType === 'chat';
       let rawContentAccumulator = '';
       let tempAssistantUIDiv = null;

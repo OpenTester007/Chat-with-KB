@@ -58,9 +58,11 @@ chrome.runtime.onConnect.addListener((port) => {
 
   let abortController = new AbortController();
   let isPortConnected = true;
+  let requestTimeoutId = null;
 
   port.onDisconnect.addListener(() => {
     isPortConnected = false;
+    if (requestTimeoutId) clearTimeout(requestTimeoutId);
     // Keep running so a popup close does not interrupt the request or history save.
   });
 
@@ -72,6 +74,8 @@ chrome.runtime.onConnect.addListener((port) => {
     if (msg.action !== 'callAPI') return;
 
     const { text, operationType, chatHistoryContext = [], targetLangValue } = msg;
+
+    let isTimeoutAbort = false;
 
     try {
       if (!ALLOWED_OPERATION_TYPES.has(operationType)) {
@@ -115,6 +119,13 @@ chrome.runtime.onConnect.addListener((port) => {
 
       const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
       if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+
+      // Timeout: abort the request if it hangs for 90 seconds.
+      // Covers network stalls where TCP stays alive but server never responds.
+      requestTimeoutId = setTimeout(() => {
+        isTimeoutAbort = true;
+        abortController.abort();
+      }, 90000);
 
       const response = await fetch(`${apiEndpoint}/chat/completions`, {
         method: 'POST',
@@ -233,9 +244,14 @@ chrome.runtime.onConnect.addListener((port) => {
         });
       }
     } catch (error) {
+      const errorMessage = isTimeoutAbort
+        ? '请求超时（90秒），请检查网络或稍后重试。'
+        : error.message;
       if (isPortConnected) {
-        port.postMessage({ type: 'error', error: error.message });
+        port.postMessage({ type: 'error', error: errorMessage });
       }
+    } finally {
+      if (requestTimeoutId) clearTimeout(requestTimeoutId);
     }
   });
 });
