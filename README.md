@@ -10,6 +10,7 @@
 
 ## Features
 
+- **Background Execution**: Translation, polishing, dictionary, and chat requests run in a background service worker. Switching tabs or closing the popup will not interrupt active operations, and finished results are automatically saved to your history.
 - **Translation**: Translate between Chinese, English, Japanese, and Korean. Auto-detects source language.
 - **Text Polishing**: Polish text and explain changes in Chinese.
 - **Dictionary**: Definitions, parts of speech, root/affix analysis, and bilingual example sentences.
