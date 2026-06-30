@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- Non-blocking tab navigation: switching tabs within the extension popup no longer aborts ongoing translation or chat tasks, allowing concurrent executions to complete in the background.
+
 ## [3.6.0] - 2026-06-29
 
 ### Changed
