@@ -88,6 +88,28 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+/* Animated dot shown on the translate tab button while a background task is running */
+.tab-nav__btn.is-running::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  vertical-align: middle;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+.tab-nav__btn.is-active.is-running::after {
+  background-color: var(--surface-color);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
 /* Tab Panels */
 .tab-container {
   display: flex;
