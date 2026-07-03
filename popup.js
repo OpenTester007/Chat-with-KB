@@ -474,6 +474,35 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (saveApiKeyBtn) saveApiKeyBtn.addEventListener('click', saveAPIConfig);
+
+  if (modelInput) {
+    let previousModelValue = '';
+    const triggerDatalist = () => {
+      if (modelInput.value) {
+        previousModelValue = modelInput.value;
+        modelInput.value = '';
+      }
+      try {
+        if (typeof modelInput.showPicker === 'function') {
+          modelInput.showPicker();
+        }
+      } catch (e) {
+        // Fallback for older browser versions
+      }
+    };
+
+    modelInput.addEventListener('focus', triggerDatalist);
+    modelInput.addEventListener('click', triggerDatalist);
+
+    modelInput.addEventListener('blur', () => {
+      // Delay to ensure any datalist selection click has time to update the value
+      setTimeout(() => {
+        if (!modelInput.value.trim()) {
+          modelInput.value = previousModelValue;
+        }
+      }, 200);
+    });
+  }
   if (translateBtn) translateBtn.addEventListener('click', () => {
     if (!isMainOperationInProgress) handleTextOperation('translate');
   });
