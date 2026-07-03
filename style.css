@@ -682,3 +682,33 @@ body {
 #clearHistoryBtn {
   margin-top: 14px;
 }
+
+/* API Key header layout & link button styles */
+.api-key-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link-btn:hover {
+  color: var(--primary-hover-color);
+}
+
+.link-btn:disabled {
+  color: var(--text-light-color);
+  cursor: not-allowed;
+  text-decoration: none;
+}

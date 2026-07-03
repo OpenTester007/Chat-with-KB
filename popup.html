@@ -64,7 +64,10 @@
           <p class="text-body">请前往 <a href="https://build.nvidia.com/models" target="_blank" rel="noopener noreferrer">NVIDIA 模型平台</a> 或其他 OpenAI 兼容平台获取 API 密钥。</p>
         </div>
         <div class="input-group">
-          <label for="apiKey" class="input-label">API 密钥：</label>
+          <div class="api-key-header">
+            <label for="apiKey" class="input-label">API 密钥：</label>
+            <button id="importDemoKeyBtn" class="link-btn">导入测试密钥</button>
+          </div>
           <input type="password" id="apiKey" class="config-input" placeholder="请输入 API 密钥">
         </div>
         <div class="input-group">
