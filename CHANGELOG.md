@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.7.0] - 2026-07-04
+
+### Added
+- One-click import test key: added an "导入测试密钥" button next to the API Key field to quickly populate default working configurations (API Key, Endpoint, and Model) for a frictionless setup. Includes remote fetch from GitHub and local base64 fallback.
+
+### Fixed
+- Fixed datalist autocomplete: resolved issue #13 by clearing the model input on click/focus to show all presets, and restoring the previous value on blur if left empty.
+
 ## [3.6.1] - 2026-07-03
 
 ### Added

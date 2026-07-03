@@ -502,6 +502,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         if (data && typeof data.key === 'string' && data.key.trim()) {
           apiKeyInput.value = atob(data.key.trim());
+          if (apiEndpointInput) apiEndpointInput.value = DEFAULT_API_ENDPOINT;
+          if (modelInput) modelInput.value = DEFAULT_MODEL;
           showToast('导入测试密钥成功！请保存设置。', 'success');
         } else {
           throw new Error('格式无效。');
@@ -512,6 +514,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const localKey = atob(kPart1 + kPart2);
           apiKeyInput.value = localKey;
+          if (apiEndpointInput) apiEndpointInput.value = DEFAULT_API_ENDPOINT;
+          if (modelInput) modelInput.value = DEFAULT_MODEL;
           showToast('从本地备份导入密钥成功！请保存设置。', 'success');
         } catch (localError) {
           showToast('导入失败，请手动配置。', 'error');
