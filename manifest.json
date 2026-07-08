@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AI-based Translator",
   "version": "3.7.0",
-  "description": "Chinese, English, Japanese, and Korean AI translation assistant",
+  "description": "全网唯一，预设免费密钥，开箱即用，极速中英日韩互译。",
   "permissions": ["storage"],
   "background": {
     "service_worker": "background.js",
