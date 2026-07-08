@@ -112,7 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function saveAPIConfig() {
     const apiKey = apiKeyInput.value.trim();
-    const model = modelInput.value.trim() || DEFAULT_MODEL;
+    let model = modelInput.value.trim();
+    if (!model && modelInput && modelInput.dataset.previousValue) {
+      model = modelInput.dataset.previousValue.trim();
+      modelInput.value = model; // Restore UI instantly on save to avoid visual discrepancy
+    }
+    if (!model) model = DEFAULT_MODEL;
 
     try {
       const apiEndpoint = normalizeEndpoint(apiEndpointInput.value.trim());
@@ -528,10 +533,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (modelInput) {
-    let previousModelValue = '';
     const triggerDatalist = () => {
       if (modelInput.value) {
-        previousModelValue = modelInput.value;
+        modelInput.dataset.previousValue = modelInput.value;
         modelInput.value = '';
       }
       try {
@@ -549,8 +553,8 @@ document.addEventListener('DOMContentLoaded', () => {
     modelInput.addEventListener('blur', () => {
       // Delay to ensure any datalist selection click has time to update the value
       setTimeout(() => {
-        if (!modelInput.value.trim()) {
-          modelInput.value = previousModelValue;
+        if (!modelInput.value.trim() && modelInput.dataset.previousValue) {
+          modelInput.value = modelInput.dataset.previousValue;
         }
       }, 200);
     });
