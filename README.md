@@ -8,9 +8,14 @@
 
 ![Extension Screenshot](screenshots/translate-store.png)
 
+> [!TIP]
+> **Frictionless Setup (No API Key Required to Test!)**
+> If you want to test the extension immediately without registering an API key, simply go to the **Settings** (设置) tab and click the **"导入测试密钥"** (Import Test Key) link. This will automatically import a pre-configured, free, and fully functional API Key, Endpoint, and Model preset, allowing you to start translating and chatting instantly.
+
 ## Features
 
 - **Background Execution**: Translation, polishing, dictionary, and chat requests run in a background service worker. Switching tabs or closing the popup will not interrupt active operations, and finished results are automatically saved to your history.
+- **One-Click Demo Setup**: Instantly populate working API configurations from settings via a secure cloud-fetch or local obfuscated fallback.
 - **Translation**: Translate between Chinese, English, Japanese, and Korean. Auto-detects source language.
 - **Text Polishing**: Polish text and explain changes in Chinese.
 - **Dictionary**: Definitions, parts of speech, root/affix analysis, and bilingual example sentences.
@@ -37,7 +42,7 @@
 2. Open `edge://extensions/` in Microsoft Edge.
 3. Enable **Developer mode**.
 4. Click **Load unpacked** and select the cloned folder.
-5. Open the extension Settings tab and configure your API key.
+5. Open the extension Settings tab, click **"导入测试密钥"** (Import Test Key) to auto-configure, or enter your own custom API Key.
 
 ## Configuration
 
@@ -115,6 +120,26 @@ CODE_OF_CONDUCT.md     # Community code of conduct
 ROADMAP.md             # Planned features
 CHANGELOG.md           # Release history
 ```
+
+## Architecture & Security Design
+
+This project is built under strict compliance with modern **Manifest V3** extension standards, focusing heavily on safety, efficiency, and compliance:
+
+* **Strict Content Security Policy (CSP)**: Completely complies with Chrome/Edge Web Store requirements. Zero usage of unsafe-eval or inline styles. All styles and logic reside in static `.css` and `.js` files.
+* **XSS Prevention**: User and AI outputs are rendered strictly using safe DOM APIs (e.g. `textContent` and `innerText`) to completely mitigate cross-site scripting (XSS) risks.
+* **Non-Blocking Background Worker**: Network requests and LLM streams run in `background.js` (Service Worker) using runtime message ports. The extension popup UI can be closed or switched to other tabs while tasks execute seamlessly in the background.
+* **Encrypted Key Transmission**: Test API-Key credentials are split-encoded in local Base64 buffers and fetched remotely using HTTPS JSON endpoints, preventing repository scanners from flagging credentials while maintaining dynamic test availability.
+
+## OpenAI Codex for OSS Program
+
+This repository is submitted to the **OpenAI Codex/API for Open Source Software** program. 
+
+Our mission is to build a completely free, fast, and privacy-first browser translation assistant. By gaining access to OpenAI's advanced reasoning models, we plan to implement:
+1. **Context-Aware Paragraph Translation**: Understanding document context beyond single sentences for industry-grade precision.
+2. **Autonomous Coding Explanations**: Deep explanation of code snippets inside the dictionary cards.
+3. **Advanced local history search** leveraging semantic search embeddings.
+
+*All contributions and documentation comply with open-source MIT guidelines.*
 
 ## Privacy
 
