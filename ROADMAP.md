@@ -2,12 +2,12 @@
 
 This document outlines planned future features and updates for the AI-based Translator extension.
 
-## Near-Term Goals (v3.6.0)
+## Near-Term Goals (v3.8.0)
 - [ ] **Context-Aware Translation**: Allow the AI to read surrounding context or paragraph-level information for higher translation accuracy.
 - [ ] **Shortcut Keys**: Support keyboard shortcuts to quickly trigger translation, polish, or chat popup.
 - [ ] **History Search**: Add a search and filter bar inside the History tab to quickly find past translations.
 
-## Medium-Term Goals (v3.7.0)
+## Medium-Term Goals (v3.9.0)
 - [ ] **Export Options**: Allow users to export translation history to CSV or Markdown formats.
 - [ ] **Voice Input / Output**: Add text-to-speech playback and voice recognition capabilities.
 - [ ] **Custom Prompts**: Provide a settings panel for custom system prompts to customize translation and dictionary formats.

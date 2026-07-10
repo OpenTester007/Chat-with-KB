@@ -15,7 +15,7 @@
 ## Features
 
 - **Background Execution**: Translation, polishing, dictionary, and chat requests run in a background service worker. Switching tabs or closing the popup will not interrupt active operations, and finished results are automatically saved to your history.
-- **One-Click Demo Setup**: Instantly populate working API configurations from settings via a secure cloud-fetch or local obfuscated fallback.
+- **One-Click Demo Setup**: Instantly populate working API configurations from settings via a remote HTTPS fetch or local Base64-encoded fallback.
 - **Translation**: Translate between Chinese, English, Japanese, and Korean. Auto-detects source language.
 - **Text Polishing**: Polish text and explain changes in Chinese.
 - **Dictionary**: Definitions, parts of speech, root/affix analysis, and bilingual example sentences.
@@ -128,18 +128,28 @@ This project is built under strict compliance with modern **Manifest V3** extens
 * **Strict Content Security Policy (CSP)**: Completely complies with Chrome/Edge Web Store requirements. Zero usage of unsafe-eval or inline styles. All styles and logic reside in static `.css` and `.js` files.
 * **XSS Prevention**: User and AI outputs are rendered strictly using safe DOM APIs (e.g. `textContent` and `innerText`) to completely mitigate cross-site scripting (XSS) risks.
 * **Non-Blocking Background Worker**: Network requests and LLM streams run in `background.js` (Service Worker) using runtime message ports. The extension popup UI can be closed or switched to other tabs while tasks execute seamlessly in the background.
-* **Encrypted Key Transmission**: Test API-Key credentials are split-encoded in local Base64 buffers and fetched remotely using HTTPS JSON endpoints, preventing repository scanners from flagging credentials while maintaining dynamic test availability.
+* **Test Key Distribution**: The demo API key is intentionally public for frictionless onboarding. It is fetched remotely over HTTPS, with a local Base64-encoded fallback so new users can test immediately even without network access.
 
 ## OpenAI Codex for OSS Program
 
-This repository is submitted to the **OpenAI Codex/API for Open Source Software** program. 
+This repository is submitted to the **OpenAI Codex/API for Open Source Software** program.
 
-Our mission is to build a completely free, fast, and privacy-first browser translation assistant. By gaining access to OpenAI's advanced reasoning models, we plan to implement:
-1. **Context-Aware Paragraph Translation**: Understanding document context beyond single sentences for industry-grade precision.
-2. **Autonomous Coding Explanations**: Deep explanation of code snippets inside the dictionary cards.
-3. **Advanced local history search** leveraging semantic search embeddings.
+As the sole maintainer, I am responsible for the full lifecycle of this project: triaging issues, reviewing pull requests, managing releases, maintaining the CHANGELOG, and publishing updates to the Microsoft Edge Add-ons store. Access to OpenAI Codex would help me sustain this work by:
 
-*All contributions and documentation comply with open-source MIT guidelines.*
+1. **Reviewing community PRs faster** — catching MV3 CSP, security, and compatibility issues in code reviews.
+2. **Improving documentation and issue responses** — generating clearer explanations for bug reports and feature requests.
+3. **Shipping higher-quality releases** — using AI-assisted refactoring and testing to reduce regressions across browser versions.
+
+All contributions and documentation comply with the MIT license.
+
+## Project Maintenance
+
+This project follows a transparent, single-maintainer workflow:
+
+- **Issues**: All bug reports and feature requests are tracked in GitHub Issues and triaged regularly.
+- **Pull Requests**: Every change is reviewed, tested locally, and merged into `main` with a clear commit message.
+- **Releases**: Versions follow semantic versioning; each release is documented in [CHANGELOG.md](CHANGELOG.md) and published as a GitHub Release.
+- **Store Updates**: Final packages are uploaded to the Edge Add-ons store for public distribution.
 
 ## Privacy
 
