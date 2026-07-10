@@ -4,13 +4,19 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-> Translation and assistant browser extension for Chinese, English, Japanese, and Korean.
+> AI-powered translation, text polishing, bilingual dictionary, and chat assistant for Chinese, English, Japanese, and Korean. Published on the Microsoft Edge Add-ons store.
 
 ![Extension Screenshot](screenshots/translate-store.png)
 
 > [!TIP]
 > **Frictionless Setup (No API Key Required to Test!)**
 > If you want to test the extension immediately without registering an API key, simply go to the **Settings** (设置) tab and click the **"导入测试密钥"** (Import Test Key) link. This will automatically import a pre-configured, free, and fully functional API Key, Endpoint, and Model preset, allowing you to start translating and chatting instantly.
+
+## Overview
+
+**AI-based Translator** is an open-source, Manifest V3 browser extension that lowers the barrier to LLM translation for Chinese, English, Japanese, and Korean users. It is published on the Microsoft Edge Add-ons store and actively maintained by a single core maintainer.
+
+The extension solves a real friction point: most LLM-powered tools require users to register, obtain an API key, and configure endpoints before they can translate a single sentence. AI-based Translator ships with a one-click **"导入测试密钥" (Import Test Key)** feature, which provides a working demo key over HTTPS or a local fallback so users can test immediately without registration.
 
 ## Features
 
@@ -134,11 +140,16 @@ This project is built under strict compliance with modern **Manifest V3** extens
 
 This repository is submitted to the **OpenAI Codex/API for Open Source Software** program.
 
-As the sole maintainer, I am responsible for the full lifecycle of this project: triaging issues, reviewing pull requests, managing releases, maintaining the CHANGELOG, and publishing updates to the Microsoft Edge Add-ons store. Access to OpenAI Codex would help me sustain this work by:
+As the sole maintainer, I am responsible for the full lifecycle of this project: triaging issues, reviewing pull requests, managing releases, maintaining the CHANGELOG, and publishing updates to the Microsoft Edge Add-ons store.
 
-1. **Reviewing community PRs faster** — catching MV3 CSP, security, and compatibility issues in code reviews.
+Access to OpenAI Codex would help me sustain this work by:
+
+1. **Reviewing community PRs faster** — catching MV3 CSP, security, and cross-browser compatibility issues in code reviews.
 2. **Improving documentation and issue responses** — generating clearer explanations for bug reports and feature requests.
-3. **Shipping higher-quality releases** — using AI-assisted refactoring and testing to reduce regressions across browser versions.
+3. **Automating release workflows** — drafting changelogs, release notes, and validation scripts for browser extension packaging.
+4. **Shipping higher-quality releases** — using AI-assisted refactoring and testing to reduce regressions across browser versions.
+
+The "Import Test Key" feature is intentionally designed as a public demo key. It is not a leaked credential; it is a core product decision to let anyone test the extension immediately without registering for an API key.
 
 All contributions and documentation comply with the MIT license.
 
