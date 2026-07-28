@@ -1,0 +1,22 @@
+Update from v3.5.0 to v3.7.0. Key changes for testers:
+
+NEW:
+- "导入测试密钥" (Import Test Key) button on Settings: one-click to auto-fill a working test API key, endpoint, and model — no registration needed. Testers can click this to start testing immediately.
+- Non-blocking tab navigation: switching tabs no longer aborts ongoing translation/chat tasks.
+- Background service worker: tasks now run in a background worker and survive popup close.
+
+FIXED:
+- Translation output no longer leaks <think> reasoning content.
+- Datalist model dropdown now shows all presets on focus (#13).
+- CSP compliance: removed inline styles.
+
+HOW TO TEST:
+1. Settings tab → click "导入测试密钥" → click "保存设置".
+2. Translate tab → enter text → pick language (EN/ZH/JA/KO) → click "翻译".
+3. Chat tab → type a message → press Enter.
+4. Switch tabs during a translation — the task continues in background.
+
+TECHNICAL:
+- API: https://integrate.api.nvidia.com/v1 (NVIDIA Build, OpenAI-compatible)
+- Permissions: only "storage". No new sensitive permissions added since v3.5.0.
+- The test key is intentionally public for zero-config onboarding (fetches from a public GitHub file with local base64 fallback). This is by design, not a leak.
