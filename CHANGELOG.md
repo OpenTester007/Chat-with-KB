@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.8.0] - 2026-08-01
+
+### Changed
+- Optimized system prompts for gpt-oss-20b reasoning model: added `Reasoning: low` to translate and dictionary prompts to reduce unnecessary reasoning overhead and first-token latency.
+- Rewrote translate prompt as a concise affirmative instruction; replaced negative phrasing ("do not include...") with positive ("output only...").
+- Restructured polish prompt into `【润色后】/【修改说明】` two-section output format for consistent, parseable results.
+- Converted dictionary prompt from numbered list to fixed markdown field template to eliminate output format drift.
+- Lowered temperature from 0.7 to 0.5 globally for improved translation and dictionary output consistency.
+
 ## [3.7.0] - 2026-07-04
 
 ### Added
