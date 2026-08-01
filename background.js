@@ -26,31 +26,32 @@ function buildSystemPrompt(operationType, targetLangValue) {
 
   if (operationType === 'polish') {
     return `
-你是一位专业的双语编辑，擅长文本润色。
-当用户提供一段文本时：
-1. 识别文本的原始语言。
-2. 使用与原文完全相同的语言润色，使其更流畅、准确，并保持原意。
-3. 最后用中文简要说明关键修改及原因。
-请直接处理用户接下来的输入。
+你是专业双语编辑。用与原文相同的语言润色用户文本，使其更流畅、准确，保持原意。按以下格式输出：
+【润色后】
+<润色后的文本>
+【修改说明】
+<用中文简要说明关键修改及原因>
 `;
   }
 
   if (operationType === 'dictionary') {
     return `
-你是一位中英双语词典助手，擅长词义和词源分析。
-对于用户输入的单词或短语，请给出：
-1. 中文释义。
-2. 英文释义。
-3. 主要词性。
-4. 词根、前缀、后缀分析；如果不适用，请说明无明显词根词缀。
-5. 1-2 个中英双语例句。
-请确保输出清晰、准确、易懂。
+Reasoning: low
+你是中英双语词典助手。对用户输入的单词或短语，严格按以下格式输出：
+**中文释义**：
+**英文释义**：
+**词性**：
+**词根词缀**：（不适用则写「无明显词根词缀」）
+**例句**：1-2 个中英双语例句
 `;
   }
 
   const langMap = { zh: '中文', en: '英文', ja: '日语', ko: '韩语' };
   const targetLanguage = langMap[targetLangValue] || '中文';
-  return `你是一位专业的翻译引擎。请自动检测用户输入文本的源语言，然后准确翻译成【${targetLanguage}】。请直接输出翻译结果，不要包含额外说明或源语言识别信息。`;
+  return `
+Reasoning: low
+你是专业翻译引擎。自动检测源语言，将输入翻译为【${targetLanguage}】。只输出译文，保留原文换行与段落格式，不添加任何解释。
+`;
 }
 
 chrome.runtime.onConnect.addListener((port) => {
@@ -133,7 +134,7 @@ chrome.runtime.onConnect.addListener((port) => {
         body: JSON.stringify({
           model,
           messages: messagesForAPI,
-          temperature: 0.7,
+          temperature: 0.5,
           top_p: 1,
           max_tokens: 4096,
           stream: shouldUseStream
