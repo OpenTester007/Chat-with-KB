@@ -18,3 +18,7 @@ AGENTS.md
 
 # Debug logs
 debug.log
+
+# Temporary and backup files
+*.bak
+
