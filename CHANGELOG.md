@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.8.1] - 2026-08-02
+
+### Changed
+- Merged improved system prompts (PR #18): added prompt-injection guards, hallucination prevention for dictionary, and expanded dictionary fields (pronunciation, collocations, etymology).
+- Restored `Reasoning: low` in the V2 translate and dictionary prompts (was lost during the V2 merge).
+- Extended `optional_host_permissions` to include `http://*/*`, enabling the "On all sites" site access option in browser extension settings.
+- Removed dead code: the original `buildSystemPrompt` function (superseded by `buildSystemPromptV2`).
+
 ## [3.8.0] - 2026-08-01
 
 ### Changed

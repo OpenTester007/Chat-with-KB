@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI-based Translator",
-  "version": "3.8.0",
+  "version": "3.8.1",
   "description": "全网唯一，预设免费密钥，开箱即用，极速中英日韩互译。",
   "permissions": ["storage"],
   "background": {
@@ -12,6 +12,7 @@
     "https://integrate.api.nvidia.com/*"
   ],
   "optional_host_permissions": [
+    "http://*/*",
     "https://*/*",
     "http://localhost/*",
     "http://127.0.0.1/*"
